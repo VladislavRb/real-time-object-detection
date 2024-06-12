@@ -7,16 +7,9 @@ from dataset import load_voc_single, load_voc
 from graphics import plot_prediction
 
 
-def checkpoint_plot_single_prediction(model, checkpoint_path, from_dataset_type):
-    model.load_weights(checkpoint_path)
-    x, _ = load_voc_single(from_dataset_type, 'voc/2007', 'E:\\my-yolo\\voc')
-    y_pred = model.predict(x)
-    plot_prediction(x[0], y_pred[0], confidence_threshold=0.8)
-
-
 def checkpoint_plot_multiple(model, checkpoint_path, from_dataset_type, amount):
     model.load_weights(checkpoint_path)
-    samples = load_voc(from_dataset_type, 'voc/2007', 'E:\\my-yolo\\voc', repeat=False, batchify=True, augment=False, take=amount)
+    samples = load_voc(from_dataset_type, 'voc/2007', 'E:\\my-yolo\\voc', repeat=False, batchify=True, take=amount)
     for batch_x, _ in samples:
         batch_y_pred = model.predict(batch_x)
         for i in range(amount):

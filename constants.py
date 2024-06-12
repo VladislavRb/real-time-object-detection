@@ -1,25 +1,15 @@
 class _Constants:
     def __init__(self, s, b, c, image_resolution):
-        # picture is divided on s x s grid cells
         self.s: int = s
-
-        # amount of bounding boxes
         self.b: int = b
-
-        # amount of classes
         self.c: int = c
-
-        # image width in pixels
         self.image_resolution: int = image_resolution
-
-        # amount of prediction values for a single cell
         self.cell_predictions_amount = 5 * self.b + self.c
 
         self.LCOORD = 5
         self.LNOOBJ = 0.5
         self.BATCH_SIZE = 16
         self.EPOCHS = 175
-        self.AUGMENT_PROB = 0.35
 
         self.CONFIDENCE_THRESHOLD = 0.7
         self.IOU_THRESHOLD = 0.7

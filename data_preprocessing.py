@@ -1,17 +1,10 @@
-import random
-
 import tensorflow as tf
 import numpy as np
 
 from constants import constants
-from utils import scale_bbox_coord
-from augment_data import AugmentData
 
 
 class PreprocessingUnit:
-    def __init__(self, augment):
-        self.augment = augment and (random.random() < constants.AUGMENT_PROB)
-        self.augment_data = AugmentData.create_random()
 
     def preprocess(self, x, y):
         p_image = tf.py_function(self._preprocess_image, [x], Tout=tf.float32)
@@ -22,19 +15,6 @@ class PreprocessingUnit:
     def _preprocess_image(self, image):
         preprocessed = tf.image.resize(images=image,
                                        size=[constants.image_resolution, constants.image_resolution]) / 255
-        if self.augment:
-            preprocessed = tf.keras.preprocessing.image.apply_affine_transform(preprocessed,
-                                                                               theta=0,
-                                                                               tx=self.augment_data.x_shift,
-                                                                               ty=self.augment_data.y_shift,
-                                                                               shear=0,
-                                                                               zx=self.augment_data.zoom,
-                                                                               zy=self.augment_data.zoom,
-                                                                               row_axis=0,
-                                                                               col_axis=1,
-                                                                               channel_axis=2)
-            preprocessed = tf.image.adjust_hue(preprocessed, delta=self.augment_data.hue_shift)
-            preprocessed = tf.image.adjust_saturation(preprocessed, saturation_factor=self.augment_data.saturation_shift)
         return preprocessed
 
     def _preprocess_ground_truth(self, original_image, classes, boxes):
@@ -48,8 +28,7 @@ class PreprocessingUnit:
 
             box_i = 0
             for box in tf.unstack(boxes):
-                center_x, center_y, width, height = self._get_box_coordinates(box, image_height, image_width,
-                                                                              self.augment, self.augment_data)
+                center_x, center_y, width, height = self._get_box_coordinates(box, image_height, image_width)
                 cell_col, cell_row = int(center_x // grid_x), int(center_y // grid_y)
                 if 0 <= cell_col < constants.s and 0 <= cell_row < constants.s:
                     cell = (cell_col, cell_row)
@@ -80,19 +59,10 @@ class PreprocessingUnit:
             print(f'A dataset record was not processed because of an error')
             return tf.zeros(shape=(constants.s, constants.s, constants.cell_predictions_amount))
 
-    def _get_box_coordinates(self, box, image_height, image_width, augment, augment_data):
+    def _get_box_coordinates(self, box, image_height, image_width):
         center_x = int(box[0])
         center_y = int(box[1])
         width = int(box[2])
         height = int(box[3])
-
-        if augment:
-            half_width = image_width * 0.5
-            half_height = image_height * 0.5
-
-            center_x = scale_bbox_coord(center_x - augment_data.x_shift, half_width, augment_data.zoom)
-            center_y = scale_bbox_coord(center_y - augment_data.y_shift, half_height, augment_data.zoom)
-            width = width / augment_data.zoom
-            height = height / augment_data.zoom
 
         return center_x, center_y, width, height

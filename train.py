@@ -1,12 +1,10 @@
 import os.path
-
-import keras.models
 from tensorflow.keras.optimizers import Adam
-from loss import general_loss
-
-from dataset import load_voc
 from callbacks import *
 from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
+
+from loss import general_loss
+from dataset import load_voc
 
 
 def train(version, model_factory, optimizer, loss, lr_scheduler):

@@ -137,7 +137,7 @@ def _unpackage_raw_tfds_inputs(inputs):
     return image, bounding_boxes
 
 
-def load_voc(split, dataset, data_dir, repeat=True, batchify=True, augment=False, take=None):
+def load_voc(split, dataset, data_dir, repeat=True, batchify=True, take=None):
     np_config.enable_numpy_behavior()
     ds: tf.data.Dataset = tfds.load(dataset, data_dir=data_dir, split=split, with_info=False, shuffle_files=False)
     ds = ds.map(
@@ -146,7 +146,7 @@ def load_voc(split, dataset, data_dir, repeat=True, batchify=True, augment=False
     )
 
     ds = ds.map(
-        lambda x, y: PreprocessingUnit(augment).preprocess(x, y),
+        lambda x, y: PreprocessingUnit().preprocess(x, y),
         num_parallel_calls=1
     )
 
@@ -167,6 +167,6 @@ def load_voc(split, dataset, data_dir, repeat=True, batchify=True, augment=False
 
 
 def load_voc_single(split, dataset, data_dir):
-    sample = load_voc(split, dataset, data_dir, repeat=False, batchify=True, augment=False, take=1)
+    sample = load_voc(split, dataset, data_dir, repeat=False, batchify=True, take=1)
     for x, y in sample:
         return x, y
